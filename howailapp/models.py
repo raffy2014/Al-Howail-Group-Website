@@ -7,78 +7,86 @@ fs = FileSystemStorage(settings.STATIC_ROOT,'pattern')
 
 
 # Create your models here.
-class BusinessType(models.Model):
-    biztype = models.CharField(max_length=50)
-    biztext = models.TextField()
+class Organization(models.Model):
+    name = models.CharField(max_length=100)
+    profile = models.TextField()
+    address = models.CharField(max_length=200)
+    email = models.EmailField()
+    website = models.URLField()
+    faxno = models.CharField(max_length=100)
+    telno = models.CharField(max_length=100)
     created_date = models.DateTimeField(default=timezone.now)
-    published_date = models.DateTimeField(blank=True, null=True)
-
-    def publish(self):
-        self.published_date = timezone.now()
-        self.save()
 
     def __str__(self):
-        return self.biztype
+        return self.name
     
     class Meta:
-        ordering = ['biztype']
+        verbose_name = "Organization"
+        verbose_name_plural = "Organizations"
+        ordering = ["name"]
 
-
-class BusinessTypeDivision(models.Model):
-    bizdivname = models.CharField(max_length=200)
-    bizdivactivity = models.TextField()
+class BusinessActivity(models.Model):
+    name = models.CharField(max_length=100)
+    profile = models.TextField()
+    address = models.CharField(max_length=200)
+    email = models.EmailField()
+    website = models.URLField()
+    faxno = models.CharField(max_length=100)
+    telno = models.CharField(max_length=100)   
     created_date = models.DateTimeField(default=timezone.now)
-    businesstype = models.ForeignKey(BusinessType, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization,on_delete=models.CASCADE)
+    division = models.ManyToManyField("BusinessDivision")
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = "Business Sector"
+        verbose_name_plural = "Business Sectors"
+        ordering = ['name']
+
+
+class BusinessDivision(models.Model):
+    division = models.CharField(max_length=200)
+    address = models.CharField(max_length=200)
+    email = models.EmailField()
+    website = models.URLField()
+    faxno = models.CharField(max_length=100)
+    telno = models.CharField(max_length=100)   
+    created_date = models.DateTimeField(default=timezone.now)
+    organization = models.ForeignKey(Organization,on_delete=models.CASCADE)
+    productcategory = models.ManyToManyField("ProductCategory")
 
     def __str__(self):
-        return self.bizdivname
+        return self.division
 
     class Meta:
-        ordering = ['bizdivname']
+        verbose_name = "Business Division"
+        verbose_name_plural = "Business Divisions"
+        ordering = ['division']
 
-class DivisionProductType(models.Model):
-    producttype = models.CharField(max_length=200)
-    created_date = models.DateTimeField(default=timezone.now)
-    businesstypedivision = models.ForeignKey(BusinessTypeDivision, on_delete=models.CASCADE)
+class ProductCategory(models.Model):
+    category = models.CharField(max_length=100,unique=True)
+    organization = models.ForeignKey(Organization,on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.producttype
-
+        return self.category
+    
     class Meta:
-        ordering = ['producttype']
-
-class DivisionProductSizes(models.Model):
-    productsize = models.CharField(max_length=200)
-    created_date = models.DateTimeField(default=timezone.now)
-    divisionproducttype = models.ForeignKey(DivisionProductType, on_delete=models.CASCADE)
+        verbose_name = "Product Category"
+        verbose_name_plural = "Product Categories"
+        ordering = ["category"]
+    
+class ProductDesign(models.Model):
+    design = models.CharField(max_length=100,unique=True)
+    photo = models.ImageField(upload_to="pattern",storage=fs)
+    organization = models.ForeignKey(Organization,on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.productsize
-
+        return self.design
+    
     class Meta:
-        ordering = ['productsize']
-
-class DivisionProductPattern(models.Model):
-    sizepattern = models.CharField(max_length=200)
-    photopattern = models.ImageField(upload_to="pattern",storage=fs)
-    created_date = models.DateTimeField(default=timezone.now)
-    divisionproducttype = models.ForeignKey(DivisionProductType, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.sizepattern
-
-    class Meta:
-        ordering = ['sizepattern']
-
-class DivisionProductList(models.Model):
-    divisionproductsizes = models.ForeignKey(DivisionProductSizes, on_delete=models.CASCADE)
-    divisionproductpattern = models.ForeignKey(DivisionProductPattern, on_delete=models.CASCADE)
-    created_date = models.DateTimeField(default=timezone.now)
-
-    def __str__(self):
-        return str('%s %s' % (self.divisionproductsizes, self.divisionproductpattern))
-
-    class Meta:
-        ordering = ['divisionproductsizes','divisionproductpattern']
-
+        verbose_name = "Product Design"
+        verbose_name_plural = "Product Designs"
+        ordering = ["design"]
 
